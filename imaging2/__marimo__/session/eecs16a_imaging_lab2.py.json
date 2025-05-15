@@ -1,0 +1,1117 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.12.6"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "1c686ee2396d7a909f81f2d9709ac167",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h1 id=\"imaging-lab-2-single-pixel-scanning\">Imaging Lab 2: Single Pixel Scanning</h1>\n<h3 id=\"eecs-16a-designing-information-devices-and-systems-i-fall-2024\">EECS 16A: Designing Information Devices and Systems I, Fall 2024</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "673a23fe8060561b85826f5a804af0e5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h1 id=\"table-of-contents\">Table of Contents</h1>\n<ul>\n<li><a href=\"#instructions\">Instructions</a></li>\n<li><a href=\"#policies\">Lab Policies</a></li>\n<li><a href=\"#overview\">Overview</a></li>\n<li><a href=\"#images\">Task 1: Images, Vectors, and Matrices</a><ul>\n<li><a href=\"#task2a\">Task 1a: Working with Images</a></li>\n<li><a href=\"#task2b\">Task 1b: Scanning Mask Matrix</a></li>\n</ul>\n</li>\n<li><a href=\"#task3\">Task 2: Imaging Real Pictures</a></li>\n<li><a href=\"#feedback\">Feedback</a></li>\n<li><a href=\"#checkoff\">Checkoff</a></li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "869fb143c2e923f013e678bc738217f7",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='instructions'></a></span>\n<h2 id=\"instructions\">Instructions</h2>\n<ul>\n<li>Complete this lab by filling in all of the required sections, marked with <code>\"YOUR CODE HERE\"</code> or <code>\"YOUR COMMENTS HERE\"</code>.</li>\n<li>When you finish, submit a checkoff request to get checked off (i.e. earn credit) for this lab. Be ready to answer a few questions to show your understanding of <strong>each section</strong>.</li>\n<li>Labs will be graded based on completion for <strong>teams of 2 students</strong>.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "f95dfa4d56daab312cba4d4287b3220f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='policies'></a></span>\n<h2 id=\"lab-policies\">Lab Policies</h2>\n<ul>\n<li><strong>YOU MUST ATTEND THE LAB SECTION YOU ARE ENROLLED IN. If you anticipate missing a section, please notify your GSI in advance.</strong></li>\n<li><strong>You are required to return all parts checked out at the beginning of the lab section unless told otherwise.</strong></li>\n<li><strong>You are free to stay for the full allotted time and hack around with the lab equipment, but please reserve the GSI's time for lab-related questions.</strong></li>\n<li><strong>Food and drinks are not allowed in the lab.</strong> </li>\n<li><strong>Clean up, turn off all equipment, and log off of computers before leaving.</strong></li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "994649050c6c81767629e3177916ae1d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h1 id=\"overview\"><a id='overview'><span style='color:blue'>Overview</span></a></h1>\n<span class=\"paragraph\"><center>\n<img src=\"./public/systemdiagram.png\" style=\"height:256px\" />\n</center></span>\n<span class=\"paragraph\">This week, you will photograph a real-life object pixel-by-pixel using a projector and light sensor circuit (a.k.a. <b>single pixel camera</b>) and write code in your Jupyter notebook to display the captured image. </span>\n<span class=\"paragraph\">You will begin by checking that the imaging circuit (pre-built for you) works and that the projector is properly connected to the computer.</span>\n<span class=\"paragraph\">Next, you will write code to generate the \"mask\" patterns that the projector uses to scan the object. </span>\n<span class=\"paragraph\">Then, you will use your generated mask matrix to photograph an object with the projector and imaging circuit setup (seen below). Finally, you will write code to recreate the image from light sensor readings that are sent to your computer via the Arduino.</span>\n<span class=\"paragraph\">To prevent room lighting from affecting these measurements, the projector setup is usually placed in a closed cardboard box. </span>\n<span class=\"paragraph\"><strong>You will not have to worry about building or understanding any circuits</strong>, as they have already been made and debugged for you. If you are interested in learning more about circuits, please ask any lab staff member and/or take EECS 16B.</span>\n<span class=\"paragraph\"><br><br>\n<center>\n    <b>Setup</b>\n<img src=\"./public/projector_setup.jpg\" style=\"height:350px\" />\n</center>\n<br></span>\n<span class=\"paragraph\">The single pixel imaging process (including some circuit detail, which again you do not need to know) would involve the following steps:\n- The projector illuminates the object with a mask.\n- The ambient light sensor detects the total amount of light reflected off the object. More light leads to more current through the sensor.\n- The analog circuit converts the sensor's current into an output voltage. More light <marimo-tex class=\"arithmatex\">||(\\rightarrow||)</marimo-tex> higher sensor current <marimo-tex class=\"arithmatex\">||(\\rightarrow||)</marimo-tex> higher output voltage.\n- This analog voltage is converted into a digital brightness value.   </span>\n<span class=\"paragraph\"><b>Note:</b> In the real world, we come across random irregular fluctuations while taking measurements. This is called noise. It is important to consider noise while designing any system, and this lab is no different. You will learn more about noisy imaging in the Imaging 3 lab.\n</font></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "e6394d30d4e3dc2c3b889c365cac57c0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "936f126321368d61d3871dc0994fdb0b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='images'></a></span>\n<h1 id=\"task-1-images-vectors-and-matrices\"><span style='color:blue'>Task 1: Images, Vectors, and Matrices </span></h1></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "89161e401ff7a3217a2ffc7051cb2935",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='task2a'></a></span>\n<h2 id=\"task-1a-working-with-images\"><span style=\"color:blue\">Task 1a: Working with Images</span></h2>\n<span class=\"paragraph\"><br></span>\n<span class=\"paragraph\">How can we represent an image? Consider a 5x5 grayscale image, where each of the 25 pixel intensities vary in shades of gray. One way to represent this is with a 2D matrix (2D NumPy array). The values stored in this array, varying from 0 to 1, correspond to different shades of gray: the lower the pixel value, the darker the pixel, with 0 being completely black and 1 being completely white. </span>\n<span class=\"paragraph\">For example, take the 5x5 <strong><code>gradient_image</code></strong> shown below. Starting from the top-left pixel (pixel[0,0]), each pixel becomes progressively brighter as you traverse the image row-by-row. </span>\n<span class=\"paragraph\">Note: We will be using 0 indexing in lab as most programming languages (including Python) index in lists starting from 0.</span>\n<span class=\"paragraph\"><center>\n<img src=\"public/gradient.JPG\" align=\"center\" style=\"height:200px\" /></span>\n<figcaption>Gradient image example</figcaption>\n<span class=\"paragraph\"></center></span>\n<span class=\"paragraph\">We can create this in Python using a <marimo-tex class=\"arithmatex\">||(5 \\times 5||)</marimo-tex> NumPy 2D array called <strong><code>gradient_image</code></strong> with <em>linearly-spaced</em> floating point values from 0 to 1. The Python code to generate this is provided for you below. Take a look at the numerical 2D array and the corresponding image that is displayed by using the <code>imshow</code> function.\n</font></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "7971a0d3c7438b19f9b10f5e10c3f36a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "image/png": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZgAAAGdCAYAAAAv9mXmAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjguNCwgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy8fJSN1AAAACXBIWXMAAA9hAAAPYQGoP6dpAAAR60lEQVR4nO3dUWhW9/348U8ayaPGJNR2ysS0CB3tOrHMpBsp7dbVLhCK1LtdFJHtyhFF8WazvRgbjPS24Cp1G93FcMrYbHuxSgObpqMI0TZUOhCEggHrpIMlMWyPGM/v4v9vfr/M1j1P9JPzHH294Fw8h/Pw/XBMfPPNyaNtRVEUAQC32T1lDwDAnUlgAEghMACkEBgAUggMACkEBoAUAgNACoEBIMWypV7w+vXrcfHixejq6oq2tralXh6AW1AURczMzMS6devinntuvkdZ8sBcvHgxent7l3pZAG6jycnJWL9+/U2vWfLAdHV1LfWSlbVixYqyR6iElStXlj1CJXR2dpY9QiX4vru5ubm5OH/+fEN/ly95YPxYrHHuVWP+2zad/8d9akx7e3vZI1RCI38/+YoDIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIsKjCvvvpqbNiwIZYvXx59fX3x7rvv3u65AKi4pgNz9OjR2Lt3b7z00kvxwQcfxFNPPRVDQ0Nx4cKFjPkAqKi2oiiKZt7wzW9+MzZv3hwHDx6cP/fVr341tm3bFiMjI//1/dPT09HT09P8pHehlStXlj1CJXR2dpY9QiW4T43xfXdzc3Nzce7cuZiamoru7u6bXtvUDubq1atx5syZGBwcXHB+cHAw3nvvveYnBeCOtayZiz/99NOYm5uLtWvXLji/du3auHTp0ue+p16vR71en389PT29iDEBqJpFPeRva2tb8LooihvOfWZkZCR6enrmj97e3sUsCUDFNBWY+++/P9rb22/YrVy+fPmGXc1n9u/fH1NTU/PH5OTk4qcFoDKaCkxHR0f09fXF6OjogvOjo6PxxBNPfO57arVadHd3LzgAuPM19QwmImLfvn2xffv26O/vj4GBgTh06FBcuHAhdu7cmTEfABXVdGC+973vxT/+8Y/42c9+Fp988kls3Lgx/vSnP8WDDz6YMR8AFdX052Bulc/BNM7v4zfG5zsa4z41xvfdzaV9DgYAGiUwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0CKZWUt/PWvfz3a29vLWr4SVq1aVfYIlbBixYqyR6gEX0+N6ezsLHuElnb16tU4d+5cQ9fawQCQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEgRdOBGRsbi61bt8a6deuira0t3njjjYSxAKi6pgMzOzsbjz32WBw4cCBjHgDuEMuafcPQ0FAMDQ1lzALAHcQzGABSNL2DaVa9Xo96vT7/enp6OntJAFpA+g5mZGQkenp65o/e3t7sJQFoAemB2b9/f0xNTc0fk5OT2UsC0ALSf0RWq9WiVqtlLwNAi2k6MFeuXInz58/Pv/74449jYmIiVq9eHQ888MBtHQ6A6mo6MKdPn47vfOc786/37dsXERE7duyI3/zmN7dtMACqrenAPP3001EURcYsANxBfA4GgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkWFbWwps3b46Ojo6ylq+EVatWlT1CJXR2dpY9QiWsXLmy7BEqwdfTzf3rX/+Kw4cPN3StHQwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUjQVmJGRkXj88cejq6sr1qxZE9u2bYtz585lzQZAhTUVmJMnT8bw8HCcOnUqRkdH49q1azE4OBizs7NZ8wFQUcuaufj48eMLXr/++uuxZs2aOHPmTHzrW9+6rYMBUG1NBeY/TU1NRUTE6tWrv/Caer0e9Xp9/vX09PStLAlARSz6IX9RFLFv37548sknY+PGjV943cjISPT09Mwfvb29i10SgApZdGB27doVH374Yfzud7+76XX79++Pqamp+WNycnKxSwJQIYv6Ednu3bvjrbfeirGxsVi/fv1Nr63ValGr1RY1HADV1VRgiqKI3bt3x7Fjx+LEiROxYcOGrLkAqLimAjM8PByHDx+ON998M7q6uuLSpUsREdHT0xMrVqxIGRCAamrqGczBgwdjamoqnn766fjyl788fxw9ejRrPgAqqukfkQFAI/xbZACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIMWyshbu7++PFStWlLV8JaxcubLsESqhs7Oz7BEqwX1qjO+7m7ty5UrD19rBAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASBFU4E5ePBgbNq0Kbq7u6O7uzsGBgbi7bffzpoNgAprKjDr16+Pl19+OU6fPh2nT5+OZ555Jp5//vn46KOPsuYDoKKWNXPx1q1bF7z++c9/HgcPHoxTp07F1772tds6GADV1lRg/q+5ubn4/e9/H7OzszEwMPCF19Xr9ajX6/Ovp6enF7skABXS9EP+s2fPxqpVq6JWq8XOnTvj2LFj8eijj37h9SMjI9HT0zN/9Pb23tLAAFRD04F5+OGHY2JiIk6dOhU//OEPY8eOHfG3v/3tC6/fv39/TE1NzR+Tk5O3NDAA1dD0j8g6OjrioYceioiI/v7+GB8fj1deeSVee+21z72+VqtFrVa7tSkBqJxb/hxMURQLnrEAQESTO5gXX3wxhoaGore3N2ZmZuLIkSNx4sSJOH78eNZ8AFRUU4H5+9//Htu3b49PPvkkenp6YtOmTXH8+PH47ne/mzUfABXVVGB+/etfZ80BwB3Gv0UGQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSLCtr4c2bN8eqVavKWr4SOjs7yx6hElauXFn2CJXg66kxvp5ubnp6uuFr7WAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkOKWAjMyMhJtbW2xd+/e2zQOAHeKRQdmfHw8Dh06FJs2bbqd8wBwh1hUYK5cuRIvvPBC/PKXv4x77733ds8EwB1gUYEZHh6O5557Lp599tn/em29Xo/p6ekFBwB3vmXNvuHIkSPx/vvvx/j4eEPXj4yMxE9/+tOmBwOg2prawUxOTsaePXvit7/9bSxfvryh9+zfvz+mpqbmj8nJyUUNCkC1NLWDOXPmTFy+fDn6+vrmz83NzcXY2FgcOHAg6vV6tLe3L3hPrVaLWq12e6YFoDKaCsyWLVvi7NmzC859//vfj0ceeSR+9KMf3RAXAO5eTQWmq6srNm7cuOBcZ2dn3HfffTecB+Du5pP8AKRo+rfI/tOJEyduwxgA3GnsYABIITAApBAYAFIIDAApBAaAFAIDQAqBASCFwACQQmAASCEwAKQQGABSCAwAKQQGgBQCA0AKgQEghcAAkEJgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFIIDAApBAaAFMuWesGiKCIi4sqVK0u9dOVcv3697BEqYW5uruwRKsF9asy1a9fKHqGlTU9PR8T//l1+M0semJmZmYiI2LJly1IvDcBtMjMzEz09PTe9pq1oJEO30fXr1+PixYvR1dUVbW1tS7n0F5qeno7e3t6YnJyM7u7ussdpSe5RY9ynxrhPjWnF+1QURczMzMS6devinntu/pRlyXcw99xzT6xfv36pl21Id3d3y/whtir3qDHuU2Pcp8a02n36bzuXz3jID0AKgQEghcBERK1Wi5/85CdRq9XKHqVluUeNcZ8a4z41pur3ackf8gNwd7CDASCFwACQQmAASCEwAKS46wPz6quvxoYNG2L58uXR19cX7777btkjtZyxsbHYunVrrFu3Ltra2uKNN94oe6SWMzIyEo8//nh0dXXFmjVrYtu2bXHu3Lmyx2o5Bw8ejE2bNs1/cHBgYCDefvvtssdqaSMjI9HW1hZ79+4te5Sm3dWBOXr0aOzduzdeeuml+OCDD+Kpp56KoaGhuHDhQtmjtZTZ2dl47LHH4sCBA2WP0rJOnjwZw8PDcerUqRgdHY1r167F4OBgzM7Olj1aS1m/fn28/PLLcfr06Th9+nQ888wz8fzzz8dHH31U9mgtaXx8PA4dOhSbNm0qe5TFKe5i3/jGN4qdO3cuOPfII48UP/7xj0uaqPVFRHHs2LGyx2h5ly9fLiKiOHnyZNmjtLx77723+NWvflX2GC1nZmam+MpXvlKMjo4W3/72t4s9e/aUPVLT7todzNWrV+PMmTMxODi44Pzg4GC89957JU3FnWJqaioiIlavXl3yJK1rbm4ujhw5ErOzszEwMFD2OC1neHg4nnvuuXj22WfLHmXRlvwfu2wVn376aczNzcXatWsXnF+7dm1cunSppKm4ExRFEfv27Ysnn3wyNm7cWPY4Lefs2bMxMDAQ//73v2PVqlVx7NixePTRR8seq6UcOXIk3n///RgfHy97lFty1wbmM//5XwYURdEy/40A1bRr16748MMP469//WvZo7Skhx9+OCYmJuKf//xn/OEPf4gdO3bEyZMnReb/m5ycjD179sQ777wTy5cvL3ucW3LXBub++++P9vb2G3Yrly9fvmFXA43avXt3vPXWWzE2Ntay/y1F2To6OuKhhx6KiIj+/v4YHx+PV155JV577bWSJ2sNZ86cicuXL0dfX9/8ubm5uRgbG4sDBw5EvV6P9vb2Eids3F37DKajoyP6+vpidHR0wfnR0dF44oknSpqKqiqKInbt2hV//OMf489//nNs2LCh7JEqoyiKqNfrZY/RMrZs2RJnz56NiYmJ+aO/vz9eeOGFmJiYqExcIu7iHUxExL59+2L79u3R398fAwMDcejQobhw4ULs3Lmz7NFaypUrV+L8+fPzrz/++OOYmJiI1atXxwMPPFDiZK1jeHg4Dh8+HG+++WZ0dXXN74x7enpixYoVJU/XOl588cUYGhqK3t7emJmZiSNHjsSJEyfi+PHjZY/WMrq6um54dtfZ2Rn33Xdf9Z7plftLbOX7xS9+UTz44INFR0dHsXnzZr9W+jn+8pe/FBFxw7Fjx46yR2sZn3d/IqJ4/fXXyx6tpfzgBz+Y/3770pe+VGzZsqV45513yh6r5VX115T9c/0ApLhrn8EAkEtgAEghMACkEBgAUggMACkEBoAUAgNACoEBIIXAAJBCYABIITAApBAYAFL8Dx5C2snOOMzMAAAAAElFTkSuQmCC"
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "[[0.         0.04166667 0.08333333 0.125      0.16666667]\n [0.20833333 0.25       0.29166667 0.33333333 0.375     ]\n [0.41666667 0.45833333 0.5        0.54166667 0.58333333]\n [0.625      0.66666667 0.70833333 0.75       0.79166667]\n [0.83333333 0.875      0.91666667 0.95833333 1.        ]]\n"
+        }
+      ]
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "e145d6b06b9c70dd5f1dec48ea05edc5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">What color does 1.0 correspond to? What about 0?</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "a4907f5c39477651d9419a29f62dde45",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Instead of treating our images as 2D matrices, we can \"reshape\" or \"flatten\" our images into 1-D vectors. That is, instead of having a <marimo-tex class=\"arithmatex\">||(5 \\times 5||)</marimo-tex> matrix for our image, we can represent it using a <marimo-tex class=\"arithmatex\">||(25 \\times 1||)</marimo-tex> vector. This makes it simpler for us to use the linear algebra techniques learned in class for image processing. </span>\n<span class=\"paragraph\">Let's look at the 3x3 example image below (colored for illustrative purposes). How can we transform this 2D vector matrix into a 1-D column vector?   </span>\n<span class=\"paragraph\">Essentially, the <marimo-tex class=\"arithmatex\">||(0||)</marimo-tex>th row is transposed (or flipped on its side by rotating 90 degress clockwise), such that its left-most element is on top and its right-most element is on the bottom. The <marimo-tex class=\"arithmatex\">||(1||)</marimo-tex>st row is also transposed on its side in the same way and appended below. These steps are repeated for each subsequent row of the original 2D image until you build a <marimo-tex class=\"arithmatex\">||(9 \\times 1||)</marimo-tex> <strong>column vector</strong>.    </span>\n<span class=\"paragraph\"><center>\n<img src=\"public/matrix_to_col_new.png\" style=\"width:500px\"/>\n</center></span>\n<span class=\"paragraph\">Mathematically, each pixel value in the <marimo-tex class=\"arithmatex\">||(3 \\times 3||)</marimo-tex> image is represented as a variable <marimo-tex class=\"arithmatex\">||(p_{ij}||)</marimo-tex>, where <marimo-tex class=\"arithmatex\">||(i||)</marimo-tex> is the row and <marimo-tex class=\"arithmatex\">||(j||)</marimo-tex> is the column associated with the pixel location. This same image represented as a 1-D column vector (called <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex>) is:</span>\n<marimo-tex class=\"arithmatex\">||[\\vec{i} = \\begin{bmatrix} p_{00} \\\\ p_{01} \\\\ p_{02} \\\\ p_{10} \\\\ p_{11} \\\\ p_{12} \\\\ p_{20} \\\\ p_{21} \\\\ p_{22} \\end{bmatrix}||]</marimo-tex><span class=\"paragraph\">The procedure described above can be used to convert any <marimo-tex class=\"arithmatex\">||(N \\times M||)</marimo-tex> 2D image into a <code>num_pixels</code> <marimo-tex class=\"arithmatex\">||(\\times 1||)</marimo-tex> <strong>column vector</strong>, where <code>num_pixels</code> <marimo-tex class=\"arithmatex\">||(= N \\times M||)</marimo-tex>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "26eabd8c6c32141ee757f32f0ad253c1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">Convert the 5x5 <code>gradient_image</code> that you created above into a 25x1 column vector <code>gradient_image_vector</code> and display it. You will find the command <code>np.reshape</code> helpful. What pattern do you notice? Think about why you see this pattern.</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "9220198f1b2bd63f77a8aeace70192c1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='task2b'></a></span>\n<h2 id=\"task-1b-scanning-mask-matrix\"><span style=\"color:blue\">Task 1b: Scanning Mask Matrix</span></h2>\n<span class=\"paragraph\">Next, we will create a \"mask\" matrix (array) to enable our projector to illuminate and scan individual pixels, one at a time. This is the magic behind our single pixel camera. </span>\n<span class=\"paragraph\">If <strong><code>gradient_image_vector</code></strong> is represented by the column vector variable <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex>, the act of transforming <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex> by a matrix <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> into another 1D column vector <marimo-tex class=\"arithmatex\">||(\\vec{s}||)</marimo-tex> is represented mathematically as:</span>\n<marimo-tex class=\"arithmatex\">||[\\vec{s} = H \\vec{i}||]</marimo-tex><span class=\"paragraph\">This matrix-vector multiplication represents what happens when we scan an image with our single pixel camera! In the context of a real-world imaging system, <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> represents the scanning \"mask matrix,\" whose rows are projected one-by-one onto the image we want to scan. <marimo-tex class=\"arithmatex\">||(\\vec{s}||)</marimo-tex> represents digitized readings from the analog circuit's light sensor. </span>\n<span class=\"paragraph\">Each element <marimo-tex class=\"arithmatex\">||(s_k||)</marimo-tex> of <marimo-tex class=\"arithmatex\">||(\\vec{s}||)</marimo-tex> corresponds to one scan (using one row <marimo-tex class=\"arithmatex\">||(k||)</marimo-tex> of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex>, that we refer to as <marimo-tex class=\"arithmatex\">||(H_k||)</marimo-tex>). Each 1D <strong>row of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex></strong> represents a <strong>mask</strong>. But what is a mask? Here, a mask is a way to highlight certain locations in the image while hiding others during scanning. For a 3x4 image (where 3 = height, 4 = width), a mask taken from <strong>row 0 of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex></strong> is represented as the <marimo-tex class=\"arithmatex\">||(1 \\times 12||)</marimo-tex> row vector below: </span>\n<marimo-tex class=\"arithmatex\">||[\nH_0 \n= \\begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\end{bmatrix}\n||]</marimo-tex><span class=\"paragraph\">However, the mask must first be converted into its 2D form, as shown below, before it's projected over the 2D image. The mask exposes only the top-left pixel of the 2D image and hides all other pixels. Note that you can convert a 2D mask into a 1D row of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> by appending each of the 2D mask's rows to the right of the previous row.\n<br><br>\n<center>\n<img src=\"public/black_hite.png\" style=\"width:400px\"/>\n</center></span>\n<span class=\"paragraph\">To expose each pixel of the 3x4 image <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex> individually, we would need a 12x12 <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> that has 12 masks (rows), each with a single white \"exposed\" pixel in a unique location. This means that <strong>row 1 of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex></strong> (exposing <marimo-tex class=\"arithmatex\">||(iv_{01}||)</marimo-tex>) would look like:</span>\n<marimo-tex class=\"arithmatex\">||[\nH_1 \n= \\begin{bmatrix} 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\end{bmatrix}\n||]</marimo-tex><span class=\"paragraph\"><br><br>\n<center>\n<img src=\"public/black_white_shifted.jpg\" style=\"width:400px\"/>\n</center></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "7f764c12f0f25e74807c42d92f52f2a6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">The process of masking an image, then uncovering one pixel at a time, and sensing the resultant ambient light performs the matrix multiplication <marimo-tex class=\"arithmatex\">||(\\vec{s} = H \\vec{i}||)</marimo-tex> in real life. This equation implies that each element of the sensor output vector <marimo-tex class=\"arithmatex\">||(\\vec{s}||)</marimo-tex> can be determined as:</span>\n<marimo-tex class=\"arithmatex\">||[s_k = H_k \\vec{i}||]</marimo-tex><span class=\"paragraph\">Where the <marimo-tex class=\"arithmatex\">||(k||)</marimo-tex>th sensor reading is determined by the mask given by <marimo-tex class=\"arithmatex\">||(k||)</marimo-tex>th row of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex>, <marimo-tex class=\"arithmatex\">||(H_k||)</marimo-tex>. Thus, projecting the 2D representation of <marimo-tex class=\"arithmatex\">||(H_0||)</marimo-tex> shown above onto a 3x4 image represented by the column vector <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex> to obtain the sensor reading <marimo-tex class=\"arithmatex\">||(s_0||)</marimo-tex> would be mathematically equivalent to:</span>\n<marimo-tex class=\"arithmatex\">||[\ns_0 = \\begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\end{bmatrix} \\vec{i}\n||]</marimo-tex></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "6097a3fb083d72ba17575ddb9f9ff677",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">What dimensions does the mask matrix <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> have for a 5x5 image? Why? </span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "47ff6424ed27d47ebc3b2d74318db637",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">\nCreate the mask matrix <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> for a 5x5 image.</span></strong></span>\n<span class=\"paragraph\">mo.md(f\\\"\"\"\nHere is a discription of a function your supposed to fill in.\n{mo.as_html(hint_1)}\n\\\"\"\")</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "2a4ac89f24468f769a81ca60bcc1b7da",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 2\n    H = # YOUR CODE HERE\n        ^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "89356c8ba4ae77d69606c316a514434a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">\nMultiply the <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> matrix with <code>gradient_image_vector</code>. Remember to use <code>np.dot</code> to do matrix multiplication and pay attention to the order of multiplcation!</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "3d051b5f452dcdc4c0b0ad16b85fa1f6",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 2\n    s = # YOUR CODE HERE\n        ^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "095273bab4bc2ea996860a848f7e2df4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">Is the resultant <code>s</code> equal to <code>gradient_image_vector</code>? Why?</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "4eb9e2b297e0906c1ad124e8ac8abdf8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">What happens when this matrix multiplication is performed? To reiterate, each row of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> is responsible for \"illuminating,\" or selecting, a single pixel in the gradient image. <code>gradient_image_vector</code> was created by converting the 5x5 <code>gradient_image</code> into a 1D <em>column vector</em>. Similarly, <em>every row</em> in <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> can be represented as a 5x5 image that, in real imaging, would be projected over <code>gradient_image</code>. </span>\n<span class=\"paragraph\"><strong><span style=\"color:red\">\nIterate through each row of the matrix <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex>. <em>Reshape</em> each row into a 5x5 image, and check that each row illuminates a unique pixel of the original 5x5 image! Based on <marimo-tex class=\"arithmatex\">||(\\vec{s} = H \\vec{i}||)</marimo-tex>, why are the rows of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> used for masking when <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex> is a column vector?</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ecfG",
+      "code_hash": "d61caf71d740eee8f7392170beea89ff",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 6\n    mask = # YOUR CODE HERE\n           ^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Pvdt",
+      "code_hash": "c0a565dbcb809b764586028f25400303",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Each of the images above are masks. During a single scan, we project one of these masks over our object. The white pixel illuminates a particular location on the object that we want to capture, and the black pixels obscure the other parts of the object. Thus, using the rows of <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex>, we gather information one pixel at a time.</span>\n<span class=\"paragraph\">Let's try to make another mask matrix, <marimo-tex class=\"arithmatex\">||(H_{alt}||)</marimo-tex>, that's a little more complicated. We want <marimo-tex class=\"arithmatex\">||(\\vec{s}||)</marimo-tex> to contain information on each pixel of the image, but in a random order. Sensing pixels in a random order and being able to reconstruct the right image is a good way to test the correctness of our imaging model. </span>\n<span class=\"paragraph\"><strong><span style=\"color:red\">\nGenerate <marimo-tex class=\"arithmatex\">||(H_{alt}||)</marimo-tex> for a 5x5 image that illuminates each pixel of the image one at a time, but in a random order. Multiply <marimo-tex class=\"arithmatex\">||(H_{alt}||)</marimo-tex> by <code>gradient_image_vector</code> to produce the new output vector <marimo-tex class=\"arithmatex\">||(\\vec{s}_{alt}||)</marimo-tex>.\n</span></strong></span>\n<span class=\"paragraph\">mo.md(f\\\"\"\"\nHere is a discription of a function your supposed to fill in.\n{mo.as_html(hint_2)}\n\\\"\"\")\nmo.md(f\\\"\"\"\nHere is a discription of a function your supposed to fill in.\n{mo.as_html(hint_3)}\n\\\"\"\")\n<br><br>\n<center>\n<img src=\"public/H_alt_new_4x4.png\" style=\"width:300px\"/>\n    <figcaption>A variation of <marimo-tex class=\"arithmatex\">||(H_{alt}||)</marimo-tex> for a 4x4 image. </figcaption>\n</center></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZBYS",
+      "code_hash": "4854227a590094713e74f904e6554d84",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 2\n    H_alt = # YOUR CODE HERE\n            ^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aLJB",
+      "code_hash": "ad2856b36018ffd6d8f1bfa9edbeb38a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Because of how we designed <code>H_alt</code>, <code>s_alt</code> is clearly different from <code>gradient_image_vector</code>. Each pixel of <code>gradient_image_vector</code> is still illuminated only once by <code>H_alt</code>, but the order in which the pixels are illuminated has changed. Therefore, we say that <code>s_alt</code> is a \"scrambled\" version of <code>gradient_image_vector</code>. How could we \"reconstruct\" <marimo-tex class=\"arithmatex\">||(\\vec{s}_{alt}||)</marimo-tex> back into the original <code>gradient_image_vector</code>? </span>\n<span class=\"paragraph\">Recall that our original matrix <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> was actually the <strong>identity matrix</strong> <marimo-tex class=\"arithmatex\">||(I_n||)</marimo-tex>. In other words, the original <marimo-tex class=\"arithmatex\">||(\\vec{s}||)</marimo-tex> was computed as:</span>\n<marimo-tex class=\"arithmatex\">||[ \\vec{s} = H \\vec{i} = I_n \\vec{i}||]</marimo-tex><span class=\"paragraph\"><br />  <br />\nUsing the alternate mask, <marimo-tex class=\"arithmatex\">||(H_{alt}||)</marimo-tex>, we compute the alternate output <marimo-tex class=\"arithmatex\">||(\\vec{s}_{alt}||)</marimo-tex> as:</span>\n<marimo-tex class=\"arithmatex\">||[ \\vec{s}_{alt} = H_{alt} \\vec{i} ||]</marimo-tex><span class=\"paragraph\">To \"reconstruct\" <marimo-tex class=\"arithmatex\">||(\\vec{s}_{alt}||)</marimo-tex> back into the original <code>gradient_image_vector</code> (i.e. <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex>), we must find a matrix <marimo-tex class=\"arithmatex\">||(M||)</marimo-tex> that multiplies <marimo-tex class=\"arithmatex\">||(\\vec{s}_{alt}||)</marimo-tex> to make the following true:</span>\n<marimo-tex class=\"arithmatex\">||[ M \\vec{s}_{alt} = \\vec{i} ||]</marimo-tex><span class=\"paragraph\">i.e.</span>\n<marimo-tex class=\"arithmatex\">||[ M H_{alt} \\vec{i} = \\vec{i} ||]</marimo-tex><span class=\"paragraph\"><strong><span style=\"color:red\">What should M be to recover <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex>?</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHfw",
+      "code_hash": "a881c7f21591422864fe81c997523a1d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><code>YOUR COMMENTS HERE</code></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xXTn",
+      "code_hash": "a70ededc559e888ae75893799fdc7eb6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">Write code to reconstruct <code>gradient_image_vector</code> from <code>s_alt</code>.</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "AjVT",
+      "code_hash": "c9b6faa6c9e14817532181d4cddbf4dd",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 2\n    M = # YOUR CODE HERE\n        ^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "pHFh",
+      "code_hash": "23be58f9c9ac9ded499d0fd31179d62c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='task3'></a></span>\n<h2 id=\"task-2-imaging-real-pictures\"><span style=\"color:blue\">Task 2: Imaging Real Pictures</span></h2>\n<span class=\"paragraph\">Finally, we will use our two matrices to image a real object; any drawing of your choice!</span>\n<span class=\"paragraph\">There are index cards and markers at the GSI desk; <strong><span style=\"color:red\">take an index card and draw something on its blank (no lines) side.</strong> Feel free to be creative and draw something cool! The course staff always loves to see cool drawings! Keep in mind though that this is not the most sophisticated imaging setup ever. Keep details to a minimum and use large features where possible to ensure a good quality image.</span>\n<span class=\"paragraph\">Because our object is fairly large, we want each individual mask to have dimensions 30x40 (i.e. height = 30, width = 40) to match the 4:3 (W:H) aspect ratio of the index card. Think about how big the mask matrix was for the 5x5 example. How big must it be for a 30x40 picture?</span>\n<span class=\"paragraph\"><strong><span style=\"color:red\">\nRecreate both the <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> and <marimo-tex class=\"arithmatex\">||(H_{alt}||)</marimo-tex> masks to match these new dimensions. </span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "NCOB",
+      "code_hash": "8be5d8a4e6467fb32debd29fa219aff2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "aqbW",
+      "code_hash": "9d6f2c3aa86b5d7fbc21b1c63092c74c",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 2\n    H = # YOUR CODE HERE\n        ^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TRpd",
+      "code_hash": "cbeee868a6ea94bb4c3b7a4fb2a9d478",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 2\n    H_alt = # YOUR CODE HERE\n            ^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TXez",
+      "code_hash": "c3c62116fc8d264f2056d04077583630",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Let's make sure that the two matrices we made are invertible and the correct size. Run the code block below to invert the matrices and test dimensions - if any of the lines fail, it means the code used to generate either matrix resulted in a incorrect size or non-invertible, linearly dependent matrix, which is incorrect.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNNg",
+      "code_hash": "e49916c0610cbe1db43d350f46572e5a",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "This cell raised an exception: NameError('name 'test_masks_img2' is not defined')",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/opt/anaconda3/lib/python3.12/site-packages/marimo/_runtime/executor.py&quot;</span>, line <span class=\"m\">142</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"k\">return</span> <span class=\"nb\">eval</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">last_expr</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n<span class=\"w\">           </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n  File <span class=\"nb\">&quot;/var/folders/25/h1_4jryj59305b5qwzxn73600000gn/T/marimo_20669/__marimo__cell_dNNg_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">test_masks_img2</span><span class=\"p\">(</span><span class=\"n\">H</span><span class=\"p\">,</span> <span class=\"n\">H_alt</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"pm\">^^^^^^^^^^^^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;test_masks_img2&#39; is not defined</span>\n</pre></div>\n</span>"
+        }
+      ]
+    },
+    {
+      "id": "yCnT",
+      "code_hash": "9ec18248f7868b2de8b85248aa76956c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Our mask matrices must be saved as files before they can be used to perform real imaging. The files are read by our imaging script, as seen below.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wlCL",
+      "code_hash": "00246595e6e415aaeb84cad4f3f0df4c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">Run the cell below to save <code>H</code> and <code>H_alt</code>!</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kqZH",
+      "code_hash": "7fa33687fa56154be42d21cdd49fd23c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "wAgl",
+      "code_hash": "53311be719d6df5da18f13aa811ad916",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "This cell raised an exception: NameError('name 'H' is not defined')",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/opt/anaconda3/lib/python3.12/site-packages/marimo/_runtime/executor.py&quot;</span>, line <span class=\"m\">141</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"n\">exec</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">body</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;/var/folders/25/h1_4jryj59305b5qwzxn73600000gn/T/marimo_20669/__marimo__cell_wAgl_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">np</span><span class=\"o\">.</span><span class=\"n\">save</span><span class=\"p\">(</span><span class=\"s1\">&#39;H.npy&#39;</span><span class=\"p\">,</span> <span class=\"n\">H</span><span class=\"p\">)</span>\n<span class=\"w\">                     </span><span class=\"pm\">^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;H&#39; is not defined</span>\n</pre></div>\n</span>"
+        }
+      ]
+    },
+    {
+      "id": "rEll",
+      "code_hash": "f1745b55133600ff1cabe6daaf2685d9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"hardware-setup\"><a id ='setup'></a><span style = \"color: blue\">Hardware Setup</span></h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dGlV",
+      "code_hash": "829b61b0198f963c9894d27020605e77",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">In order to transfer this theoretical masking procedure to a real-life imaging setup, you will build some hardware. Summarized briefly, the hardware performs the following functions:\n1. Project a mask matrix for a given pixel onto an index card\n2. Read the amount of light reflected off the card using an ambient light sensor. We will refer to this as the \"imaging circuit\" though you may see older references use this terminology.\n3. Store this reading in a result matrix\n4. Repeat steps 1-3 until the entire image is stored in the result matrix</span>\n<span class=\"paragraph\">Most of the circuits which do the heavy lifting have already been built for you, so you will only have to set up the following pieces:\n1. Box: This holds the entire setup together and is where you will connect most of the hardware pieces together.\n2. Projector: The projector displays the mask matrix onto the index card, so it must be setup correctly to do this.\n3. Arduino Leonardo: An Arduino is a microcontroller (think of a small computer) that reads the light reflected off the card and sends it back to your computer for further processing.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SdmI",
+      "code_hash": "7f2f6880a024da2aba00dc36fe36df3d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h3 id=\"box-setup\"><a id ='setup'></a><span style = \"color: blue\">Box Setup</span></h3>\n<span class=\"paragraph\"><img src=\"public/projector_setup.jpg\" style=\"width:400px\"/></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lgWD",
+      "code_hash": "87274b14ee13271244f25fc6da11eec9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><ol>\n<li>Take the cardboard box at your station down from the top left next to some of the lab equipment, and open the top. <strong>Only remove cables and loose items as needed</strong>. The projector setup shown above should be <strong>left inside the box</strong>.</li>\n<li>Tape the index card you drew on inside the box so that the projector can project onto it (see image).</li>\n<li>Place the breadboard such that the side with the holes on it is facing the index card. The Arduino should then rest on the bottom of the box behind the imaging circuit and underneath the projector. Make sure the light sensor is centered at the top, as in the picture above. Try your best to ensure that the wires do not obstruct the projection from the projector onto the index card.</li>\n<li>Orient the projector so the lens is facing towards the object being imaged, and the ports are facing the opposite direction (see image).</li>\n<li><strong>Pay close attention to where the holes are in the box, picture on next page</strong>. The holes are cut out to make connecting the mini-HDMI and power cables easier. Align the holes to both the circular power connector and the mini-HDMI port on the back of the projector to the short, back side of the box that has a hole in it.</li>\n<li>Route the power cable through the back to the DC connector and the mini-HDMI cable (at your lab station behind the keyboard under the monitor stand, <strong>one end already connected to your lab computer</strong>) through the back and connect them both to the projector <strong>very gently</strong>. Please ensure you\u2019re using the right projector ports.\n    <img src=\"public/projector_overview_ports.png\" style=\"width:400px\"/></li>\n<li>Take the long USB cable and route it through the side hole (or back) and connect it to the Arduino.</li>\n<li>The power cable must be plugged into an outlet - there are outlets at each station (see picture). Make sure the barrel connector is fully plugged into your projector - if the connection is loose during the scan you may have issues. A red light should show on the back of the projector to indicate that it is charging. Turn on the projector by pressing and holding the power button on the back.</li>\n<li>Plug the USB 2.0 end of the USB cable into the lab computer.</li>\n<li>Confirm your setup with the full setup below\n<img src=\"public/box_setup.jpg\" style=\"width:400px\"/></li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "yOPj",
+      "code_hash": "9a9207a4435ca4d48409bc08b9cfae0e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h3 id=\"projector-setup\"><a id ='setup'></a><span style = \"color: blue\">Projector Setup</span></h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "fwwy",
+      "code_hash": "d1f6eca86c1722ae7f190cae61ed2958",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><img src=\"public/projector_overview.png\" style=\"width:500px\"/></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LJZf",
+      "code_hash": "520d351678c59312262a644d48471e4b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong>Setup the projector with the following steps:</strong></span>\n<ol>\n<li>Turn on the projector by holding down the Power button (see the previous figure). You should see a green light turn on when it powers on.</li>\n<li>Find the Focus Adjustment wheel on the side of the projector to adjust the focus of the projection onto the box. Focus it as close as possible.\n<img src='public/projector_home.jpg' style='width: 400px' />\n<img src=\"public/projector_home.jpg\" style=\"width:400px\"/></li>\n<li>Using the left/right arrows on the Directional Pads, select <strong>INPUTS</strong> on the projector's main menu, then <strong>DIGITAL</strong>. After a few seconds, you should see the Windows 10 desktop.\n<img src=\"public/projector_inputs.jpg\" style=\"width:400px\"/></li>\n<li>If you see the Windows 10 taskbar at the bottom of the projected screen, take the following precautions:<ul>\n<li>Hit the Windows key and type Settings.</li>\n<li>Click on the Personalization icon.</li>\n<li>Click on Taskbar on the left side.</li>\n<li>Under the Multiple Displays section, turn Show taskbar on all displays off.</li>\n</ul>\n</li>\n<li>If your monitor turns off, hit Windows key and P at the same time. Then select \u201cExtend\u201d</li>\n<li>Use the <strong>Back button</strong> on the projector to return to displaying the <strong>main menu</strong>.</li>\n<li>Use the left/right arrows to select the <strong>Settings</strong> option (gears icon, see picture on previous page).\n<img src=\"public/projector_settings.jpg\" style=\"width:400px\"/></li>\n<li>Select <strong>Picture Mode</strong> and change the <strong>Picture Mode</strong> from Standard to <strong>User</strong>.</li>\n<li><strong>IMPORTANT</strong>: Use the down arrow to move the cursor down to Contrast. Then use the right arrow to adjust the contrast to <strong>100</strong>.</li>\n<li><strong>IMPORTANT</strong>: Move the cursor down to Brightness and use the left arrow to adjust the brightness to <strong>0</strong>.</li>\n<li>To <strong>Confirm the selection</strong>, hit <strong>OK</strong> and exit the menu with the <strong>Back button</strong>.</li>\n<li>Go back to <strong>Settings</strong> and select <strong>ECO</strong> for <strong>brightness</strong></li>\n<li>Hit the button <strong>SOURCE</strong> and then <strong>DIGITAL</strong> and make sure that you see the Windows 10 desktop on your projector.</li>\n<li>Place the properly set up projector inside the box, as shown in the image above.</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "urSm",
+      "code_hash": "b9b9dd8aa18a0a0e7b4354c07eb3019a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h3 id=\"arduino-leonardo-setup\"><a id ='setup'></a><span style = \"color: blue\">Arduino Leonardo Setup</span></h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "jxvo",
+      "code_hash": "d521c05d8ef4a27019452f269aab877a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><ol>\n<li>Launch <strong>Arduino IDE</strong> (from Desktop)</li>\n<li>Open the <strong>AnalogReadSerial.ino</strong> file in Arduino IDE (<em>File &gt; Open</em>). This will be located in the lab files you downloaded.</li>\n<li>Select <em>Tools &gt; Board &gt; Arduino Leonardo</em>.</li>\n<li>Verify the correct Serial Port is selected in the Ardunio IDE by going to <em>Tools &gt; Port</em>. If the selected value already displays the board name after the COM port (i.e. \"COM5 (Arduino Leonardo)\"), proceed to the next step. If not, open the Windows \"Device Manager\" and look for the Arduino Leonardo's COM Port under \"COM Ports\", then select this port in the Arduino IDE.</li>\n<li>Upload the code by clicking on the Upload button (white circle with a right-pointing arrow, as shown below):\n<img src=\"public/arduino_menu.png\" style=\"width:200px\"/></li>\n<li>Hit the <strong>RESET</strong> button on your Arduino (labeled reset or RST).</li>\n<li>To verify that the program is working, <strong>type a 6 into the serial monitor</strong> (<em>Tools &gt; Serial Monitor</em>). <strong>You will need to set the Baud Rate to 115200</strong>. You should see a reading from the ambient light sensor appear. If the numbers increase with light and decrease with less light your setup is good. You must close this window before continuing.\n<img src=\"public/arduino_serial_monitor.png\" style=\"width:400px\"/></li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "mWxS",
+      "code_hash": "f49b80c849814e932e9110675ca437b1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">Double check that you've done the following before proceeding:</span></strong></span>\n<ul>\n<li>\n<span class=\"paragraph\">Upload <code>AnalogReadSerial</code> to the Arduino. Press the reset button on the Arduino to make sure the script is running.</span>\n</li>\n<li>\n<span class=\"paragraph\"><strong>Close out of the Arduino IDE Serial Monitor.</strong> Not doing so will result in your COM port being unavailable.</span>\n</li>\n<li>\n<span class=\"paragraph\">Make sure the projector is connected and projecting the correct image. It should show a smaller version of your desktop (windows logo by default).</span>\n</li>\n<li>\n<span class=\"paragraph\">Seal the imaging system inside the box to keep ambient light out during scanning. If the holes for cables are too big, try to have them face a solid, unmoving object that can block out light. Alternatively, cover the entire the box with clothing.</span>\n</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "CcZR",
+      "code_hash": "14080889024ea70c278878d6e6aaf881",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">You will then run the <code>capture_image.scan(...)</code> function (through the cell below) that projects mask patterns onto your image based on the <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> matrix that you designate. This function controls the scanning process.</span></strong> </span>\n<span class=\"paragraph\">When running <strong><code>capture_image.scan(...)</code></strong>, a new icon shaped like a white web will appear in the taskbar. The window depicting our masks will appear on the projector's screen. <em>You can confirm this by looking into the box. (Don't forget to close the box when you're done checking!)</em></span>\n<span class=\"paragraph\"><code>capture_image.scan(...)</code> iterates over the rows of the <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> matrix you made. These rows are translated, one-by-one, into real masks projected onto the screen. If you take a peek inside your scanning system while the scan is completing (<em>Only from the side wire ports! Never open the top while scanning!</em>), you will see white rectangles where your mask has value <code>1</code> and black rectangles where your mask has value <code>0</code>.</span>\n<span class=\"paragraph\">The whole scanning process should take roughly <strong>4 minutes</strong>. </span>\n<span class=\"paragraph\">Click the button below to run a scan.</span>\n<span class=\"paragraph\"><marimo-ui-element object-id='woaO-0' random-id='2bab63e1-1822-f993-4d0f-240c2ada4a5d'><marimo-button data-initial-value='0' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Run Scan&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;neutral&quot;' data-disabled='false' data-full-width='false'></marimo-button></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "YWSi",
+      "code_hash": "54e65c7832bbd290bfa2e5f3f6705fe1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "zlud",
+      "code_hash": "384d24fb4f2560d4a2af250a5e66c825",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong>Not getting a good image?</strong></span>\n<span class=\"paragraph\">Make sure you have the following:</span>\n<ol>\n<li>The projector turned on and oriented in the correct direction</li>\n<li>The projector input set to \"Digital\"</li>\n<li>Verified the mask is displaying from the projector<ul>\n<li>You should see white squares scrolling across the projected screen</li>\n</ul>\n</li>\n<li>Code successfully uploaded to the Arduino<ul>\n<li>The Arduino IDE will notify you if the upload fails</li>\n</ul>\n</li>\n<li>Nothing obstructing the ambient light sensor's view of the projected screen</li>\n<li>The taskbar disabled</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "tZnO",
+      "code_hash": "9baeb4b03c584c17fd9b5d80d0b73659",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">After the sensor readings have been captured, load the sensor reading vector into the cell below. Once again, here is the equation relating <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex>, the sensor reading column vector <marimo-tex class=\"arithmatex\">||(\\vec{s}||)</marimo-tex>, and the image column vector <marimo-tex class=\"arithmatex\">||(\\vec{i}||)</marimo-tex>:</span>\n<marimo-tex class=\"arithmatex\">||[\\vec{s} = H \\vec{i}||]</marimo-tex><span class=\"paragraph\"><strong><span style=\"color:red\">Recreate the image from the sensor readings obtained with <code>H</code>.</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "xvXZ",
+      "code_hash": "7469ff21b0b2eaa2ee823e1953d242ee",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 3\n    iv = # YOUR CODE HERE\n         ^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "CLip",
+      "code_hash": "dcfee73e6526099e7e726baa275c9b9e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">\nDoes your recreated image match the real image? What are some problems you notice? \n</span></strong></span>\n<span class=\"paragraph\">Here is an example of a picture we took using this setup:</span>\n<span class=\"paragraph\"><center>\n<img src=\"public/ee16a_picture.png\"/>\n</center></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "YECM",
+      "code_hash": "174e786cc2b669eeaf38713f54f7fddd",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">Next, use the second mask <code>H_alt</code> for imaging. Can you repeat the same reconstruction procedure just by replacing <marimo-tex class=\"arithmatex\">||(H||)</marimo-tex> with <marimo-tex class=\"arithmatex\">||(H_{alt}||)</marimo-tex>? Why or why not?</span></strong></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "cEAS",
+      "code_hash": "d1acdcb304455f7e124a0e3f00211f80",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Run <code>capture_image.scan(...)</code> again (taking the same precautions as above) to collect sensor readings. Make sure to run it from the code block below to point the script to <code>H_alt</code>. Then reconstruct the image.\n<br>\n<marimo-ui-element object-id='woaO-1' random-id='48626b2d-28d4-190a-76f1-d2f4eb1b125c'><marimo-button data-initial-value='0' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;Run Scan&lt;/span&gt;&lt;/span&gt;&quot;' data-kind='&quot;neutral&quot;' data-disabled='false' data-full-width='false'></marimo-button></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iXej",
+      "code_hash": "dd9eea4188bb5c6ad482fc086a7cf79f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "EJmg",
+      "code_hash": "da4886be69ec7db13ba92961afa79785",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Observe your sensor reading. Since we're scanning pixels of the image in a random order, it should be a scrambled version of the image.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "UmEG",
+      "code_hash": "987d1dbf90eeb4a67f7317205c831cd0",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 3\n    iv = # YOUR CODE HERE \n         ^^^^^^^^^^^^^^^^^^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vEBW",
+      "code_hash": "9f6c8302786c6996f308a2c034a0f036",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><strong><span style=\"color:red\">The sensor reading is a scrambled version of the image. Were you able to reconstruct the image correctly? How did it get \"unscrambled\"?  </span></strong></span>\n<span class=\"paragraph\"><code>YOUR ANSWER HERE</code></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "kLmu",
+      "code_hash": "bc86689b6b020aa5ccebc116fc393c5f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">You are done for the week! Save your code and setup for next lab, where you will illuminate multiple pixels per mask!</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "IpqN",
+      "code_hash": "9e08c8499c46b65c06c6209340f7cc3b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='task4'></a></span>\n<h1 id=\"optional-task-3-color-imaging\"><span style=\"color:blue\">(OPTIONAL) Task 3: Color Imaging</span></h1></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dxZZ",
+      "code_hash": "99ea8b45c247e64b972ba7a972eba000",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">We've seen how we can perform reconstruction of our hand-drawn picture using the model <marimo-tex class=\"arithmatex\">||(\\vec{s} = H \\vec{i}||)</marimo-tex>. But what if we wanted to image in color instead of just in grayscale?</span>\n<span class=\"paragraph\">Recall that our system works by projecting masks onto our image and measuring the reflected light. In Task 2, the masks we used were black and white. If we shine white light on any color, we'll get some amount of reflected light back, which makes our system work regardless of what color we use to draw our image. The downside is we can't differentiate between colors.</span>\n<span class=\"paragraph\">One way to \"select\" colors is by changing the color of the masks we project. If we shine red light at a particular pixel on the index card, we expect to only get reflected light when the color of that pixel is red (or close to it). This idea prompts us to consider channel-wise reconstruction. That is, instead of</span>\n<marimo-tex class=\"arithmatex\">||[\\vec{s_{gray}} = H_{gray} \\vec{i_{gray}}||]</marimo-tex><span class=\"paragraph\">we now have\n<marimo-tex class=\"arithmatex\">||(<marimo-tex class=\"arithmatex\">||(\\vec{s_{red}} = H_{red} \\vec{i_{red}}||)</marimo-tex>||)</marimo-tex>\n<marimo-tex class=\"arithmatex\">||(<marimo-tex class=\"arithmatex\">||(\\vec{s_{green}} = H_{green} \\vec{i_{green}}||)</marimo-tex>||)</marimo-tex>\n<marimo-tex class=\"arithmatex\">||(<marimo-tex class=\"arithmatex\">||(\\vec{s_{blue}} = H_{blue} \\vec{i_{blue}}||)</marimo-tex>||)</marimo-tex></span>\n<span class=\"paragraph\">which we can then solve to find <marimo-tex class=\"arithmatex\">||(i_{red}||)</marimo-tex>, <marimo-tex class=\"arithmatex\">||(i_{green}||)</marimo-tex>, and <marimo-tex class=\"arithmatex\">||(i_{blue}||)</marimo-tex>. By appropriately combining these channels, we can produce a color image!</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dlnW",
+      "code_hash": "6933f98ebe8375de0e56cbe172f94fe2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Below, we implement this process. Note that for each pixel, we sequentially measure its red, green, and blue channels rather than measuring the red channel of the entire image, followed by the green and blue channels. If we used the latter process, a small disturbance in the position of the projector would result in misaligned red, green, and blue channels. This would cause the entire image to be inaccurate. By using the former process, we are significantly reducing this risk, since a temporary disturbance in the position would only cause few pixels to be inaccurate.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TTti",
+      "code_hash": "6d340d47888bb17f232b5f84830b75b5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Use colored markers to make a new index card! Then, following the same procedure as in Task 2, run the following cell block. Note that this will take 3 times as long as before (probably around 10 minutes) because we have to take thrice the measurements.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RKFZ",
+      "code_hash": "0846c0d2fb1fc84c4223ebcefe816eab",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "This cell raised an exception: FileNotFoundError('[Errno 2] No such file or directory: 'sensor_readingsH_100_0_blue.npy'')",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/opt/anaconda3/lib/python3.12/site-packages/marimo/_runtime/executor.py&quot;</span>, line <span class=\"m\">141</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"n\">exec</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">body</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;/var/folders/25/h1_4jryj59305b5qwzxn73600000gn/T/marimo_20669/__marimo__cell_RKFZ_.py&quot;</span>, line <span class=\"m\">3</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">sr_blue</span> <span class=\"o\">=</span> <span class=\"n\">np</span><span class=\"o\">.</span><span class=\"n\">load</span><span class=\"p\">(</span><span class=\"s1\">&#39;sensor_readingsH_100_0_blue.npy&#39;</span><span class=\"p\">)[:</span><span class=\"mi\">1024</span><span class=\"p\">]</span>\n<span class=\"w\">              </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n  File <span class=\"nb\">&quot;/opt/anaconda3/lib/python3.12/site-packages/numpy/lib/npyio.py&quot;</span>, line <span class=\"m\">427</span>, in <span class=\"n\">load</span>\n<span class=\"w\">    </span><span class=\"n\">fid</span> <span class=\"o\">=</span> <span class=\"n\">stack</span><span class=\"o\">.</span><span class=\"n\">enter_context</span><span class=\"p\">(</span><span class=\"nb\">open</span><span class=\"p\">(</span><span class=\"n\">os_fspath</span><span class=\"p\">(</span><span class=\"n\">file</span><span class=\"p\">),</span> <span class=\"s2\">&quot;rb&quot;</span><span class=\"p\">))</span>\n<span class=\"w\">                              </span><span class=\"pm\">^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>\n<span class=\"gr\">FileNotFoundError</span>: <span class=\"n\">[Errno 2] No such file or directory: &#39;sensor_readingsH_100_0_blue.npy&#39;</span>\n</pre></div>\n</span>"
+        }
+      ]
+    },
+    {
+      "id": "IaQp",
+      "code_hash": "b58079212b7f8be8ff0d52bcfe6fdc30",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\">Did the scan work? Don't worry if it doesn't look that great; we have provided some post-processing to adjust your measurements. You do not need to know how post-processing works in this lab.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "IWgg",
+      "code_hash": "54ee925fee5e34802ed5dc926a2f0d21",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "This cell raised an exception: NameError('name 'post_process' is not defined')",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;/opt/anaconda3/lib/python3.12/site-packages/marimo/_runtime/executor.py&quot;</span>, line <span class=\"m\">141</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"n\">exec</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">body</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n  File <span class=\"nb\">&quot;/var/folders/25/h1_4jryj59305b5qwzxn73600000gn/T/marimo_20669/__marimo__cell_IWgg_.py&quot;</span>, line <span class=\"m\">1</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"n\">sr_3</span> <span class=\"o\">=</span> <span class=\"n\">post_process</span><span class=\"p\">(</span><span class=\"n\">sr_blue</span><span class=\"p\">,</span> <span class=\"n\">sr_green</span><span class=\"p\">,</span> <span class=\"n\">sr_red</span><span class=\"p\">)</span>\n<span class=\"w\">           </span><span class=\"pm\">^^^^^^^^^^^^</span>\n<span class=\"gr\">NameError</span>: <span class=\"n\">name &#39;post_process&#39; is not defined</span>\n</pre></div>\n</span>"
+        }
+      ]
+    },
+    {
+      "id": "fCoF",
+      "code_hash": "687357cfc6c88e8de9463834ed34eba9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"do-not-take-apart-your-setup-do-not-take-any-of-it-with-you\"><strong><span style=\"color:red\"> Do not take apart your setup. Do not take any of it with you! </span></strong></h2>\n<span class=\"paragraph\"><strong>Please ensure you've placed the entire imaging setup box with the following items back on the station shelf:</strong></span>\n<ol>\n<li>Pico Projector</li>\n<li>Power Adapter</li>\n<li>Long micro USB cable</li>\n<li>Wooden Stand</li>\n<li>Arduino Leonardo</li>\n<li>Imaging circuit on breadboard</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "LkGn",
+      "code_hash": "04df9596dcc21d08d5e83a0f3f57d96d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='feedback'></a></span>\n<h2 id=\"feedback\">Feedback</h2>\n<span class=\"paragraph\">If you have any feedback to give the teaching staff about the course (lab content, staff, etc), you can submit it through this Google form. Responses are <strong>fully anonymous</strong> and responses are actively monitored to improve the labs and course. Completing this form is <strong>not required</strong>.</span>\n<span class=\"paragraph\"><a href=\"https://docs.google.com/forms/d/e/1FAIpQLSdSbJHYZpZqcIKYTw8CfpfrX6OYaGzqlgBtKfsNKEOs4BzZJg/viewform?usp=sf_link\" rel=\"noopener\" target=\"_blank\">Anyonymous feedback Google form</a></span>\n<span class=\"paragraph\"><em>If you have a personal matter to discuss or need a response to your feedback, please contact <a href=\"mailto:eecs16a.lab@berkeley.edu\"><a href=\"&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#101;&#101;&#99;&#115;&#49;&#54;&#97;&#46;&#108;&#97;&#98;&#64;&#98;&#101;&#114;&#107;&#101;&#108;&#101;&#121;&#46;&#101;&#100;&#117;\">&#101;&#101;&#99;&#115;&#49;&#54;&#97;&#46;&#108;&#97;&#98;&#64;&#98;&#101;&#114;&#107;&#101;&#108;&#101;&#121;&#46;&#101;&#100;&#117;</a></a> and/or <a href=\"mailto:eecs16a@berkeley.edu\"><a href=\"&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#101;&#101;&#99;&#115;&#49;&#54;&#97;&#64;&#98;&#101;&#114;&#107;&#101;&#108;&#101;&#121;&#46;&#101;&#100;&#117;\">&#101;&#101;&#99;&#115;&#49;&#54;&#97;&#64;&#98;&#101;&#114;&#107;&#101;&#108;&#101;&#121;&#46;&#101;&#100;&#117;</a></a></em>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "zVRe",
+      "code_hash": "fb1c57c6514352ad2f42a22340bf52b1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><a id='checkoff'></a></span>\n<h2 id=\"checkoff\">Checkoff</h2>\n<span class=\"paragraph\">When you are ready to get checked off, fill out the checkoff google form. <strong><a href=\"https://docs.google.com/forms/d/e/1FAIpQLSfIOjvEJXew-M0-h9uJ3C25UOdmmABFK0GGNl3o9p7po7Cc0A/viewform?usp=sf_link\" rel=\"noopener\" target=\"_blank\">Checkoff Form</a></strong></span>\n<span class=\"paragraph\">Your GSI or a Lab Assistant will join you when they are available and go through some checkoff questions with your group. They will go through the checkoff list in order. Please be patient!</span>\n<h4 id=\"post-checkoff-clean-up-this-applies-to-each-weeks-lab\">Post-checkoff Clean Up: (this applies to each week's lab)</h4>\n<ol start=\"2\">\n<li>Throw away any trash at your station</li>\n<li>SIGN OUT of the computers - DO NOT SHUT DOWN</li>\n<li>Check that the projector is powered off and disconnected</li>\n</ol></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "woaO",
+      "code_hash": "1c94596a91638c06530c6801273d4cce",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "HnMC",
+      "code_hash": "f710d9f0ef45de6e662d3ab35b68d182",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 5\n    hint_5 = mo.accordion({\"Hint\": \"Hint\": \"You need to perform a matrix operation before multiplying\"})\n                                         ^\nSyntaxError: invalid syntax\n",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Jtto",
+      "code_hash": "939d3263a502005026ecf3acfe26419a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "zrrP",
+      "code_hash": null,
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "QXBK",
+      "code_hash": "a9c554afd5a1ebdbd7aee3b8f5e6fe04",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><marimo-ui-element object-id='Jtto-0' random-id='5ab76034-c4d5-476a-8654-b738de8adf33'><marimo-text-area data-initial-value='&quot;&quot;' data-label='null' data-placeholder='&quot;Type your answer here &#92;u2026&quot;' data-disabled='false' data-debounce='true' data-full-width='false'></marimo-text-area></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qXjM",
+      "code_hash": "2aceaa4c6ab8c984481c11121129d604",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><marimo-ui-element object-id='Jtto-2' random-id='86ef93d5-fd8f-c971-fe6a-9d5bcbb239b2'><marimo-text-area data-initial-value='&quot;&quot;' data-label='null' data-placeholder='&quot;Type your answer here &#92;u2026&quot;' data-disabled='false' data-debounce='true' data-full-width='false'></marimo-text-area></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "FtRO",
+      "code_hash": "5ca56d63ae44413ee51bdbfd098ebaa1",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><marimo-ui-element object-id='Jtto-3' random-id='ced8d892-a73f-ad9f-e66e-3a492054c2a0'><marimo-text-area data-initial-value='&quot;&quot;' data-label='null' data-placeholder='&quot;Type your answer here &#92;u2026&quot;' data-disabled='false' data-debounce='true' data-full-width='false'></marimo-text-area></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nHiy",
+      "code_hash": "7162c920ce8fa32723d7540ed52f677e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><marimo-ui-element object-id='Jtto-4' random-id='3c4bedf5-d26a-fb40-0ca0-841fab843d00'><marimo-text-area data-initial-value='&quot;&quot;' data-label='null' data-placeholder='&quot;Type your answer here &#92;u2026&quot;' data-disabled='false' data-debounce='true' data-full-width='false'></marimo-text-area></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "XLLr",
+      "code_hash": "02f6e37f56436aaf0e3333049f654958",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><marimo-ui-element object-id='Jtto-5' random-id='f4dcfc3e-ec68-885c-a9bc-d3dfc8752c2f'><marimo-text-area data-initial-value='&quot;&quot;' data-label='null' data-placeholder='&quot;Type your answer here &#92;u2026&quot;' data-disabled='false' data-debounce='true' data-full-width='false'></marimo-text-area></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "sbsb",
+      "code_hash": "0e96c634ddc90a3a1a983bdb61cf4690",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><marimo-ui-element object-id='Jtto-6' random-id='c48d60da-b863-e81c-17b9-2d0d0e8e30dd'><marimo-text-area data-initial-value='&quot;&quot;' data-label='null' data-placeholder='&quot;Type your answer here &#92;u2026&quot;' data-disabled='false' data-debounce='true' data-full-width='false'></marimo-text-area></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "KALU",
+      "code_hash": "bb99d87e36bfd9a4641a347040484e2f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><span class=\"paragraph\"><marimo-ui-element object-id='Jtto-7' random-id='348c79ed-9a56-d32b-2268-dd0886d2886d'><marimo-text-area data-initial-value='&quot;&quot;' data-label='null' data-placeholder='&quot;Type your answer here &#92;u2026&quot;' data-disabled='false' data-debounce='true' data-full-width='false'></marimo-text-area></marimo-ui-element></span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
